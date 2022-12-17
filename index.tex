@@ -1,0 +1,160 @@
+\documentclass[11pt]{article}
+
+\usepackage{enumitem,amsmath,amssymb,graphicx,fancyhdr,framed}
+\usepackage[margin=1in,headsep=0.2in]{geometry}
+\pagestyle{fancy}
+
+%%% TODO: Fill in the following fields
+\newcommand{\psetnumber}{1}
+\newcommand{\name}{Sacha SIMON}
+\newcommand{\collaborators}{none}
+
+\begin{document}
+
+\lhead{Symmetric Cryptography - Problem Set \psetnumber}
+\rhead{\name}
+
+\begin{center}
+{\Large Symmetric Cryptography - Problem Set \psetnumber}
+\medskip
+
+\begin{tabular}{rl}
+Name: & \name \\
+Collaborators: & \collaborators
+\end{tabular}
+\end{center}
+
+\begin{framed}
+\noindent \small By turning in this assignment, I declare
+that all of this is my own work.
+\end{framed}
+
+\section*{Problem 1}
+
+\begin{enumerate}
+  \item 
+We want to show that there exists an affine cipher $E_k_3(x)=a_3x+b_3$ that behaves exactly like: $E_k_1(E_k_2(x))$, knowing that : 
+\[
+\left \{
+\begin{array}{c @{=} c}
+   E_k_1(x) & a_1x+b_1 \\
+    E_k_2(x) & a_2x+b_2
+\end{array}
+\right.
+\]
+
+Let $a_1$, $a_2$, $b_1$, $b_2 \in$ $\left\{ 0,1,...,25 \right\}$ \\ \\
+\begin{align*}
+E_k_3(x) &=E_k_1(E_k_2(x)) \\
+       &= a_1.E_k_2(x)+b_1 (mod26)\\
+       &= a_1.(a_2x + b_2)+b_1 (mod26)\\
+       &= a_1a_2x + a_1b_2+b_1 (mod26)\\
+\end{align*}
+Let $a_3$, $b_3 \in\left\{ 0,1,...,25 \right\}$ with $a_3 = a_1.a_2 |26|$ and $b_3 = a_1.b_2 + b_1 |26|$. 
+Therefore we can write the affine cipher :\\
+$E_k_3(x) = a_3x+b_3 (mod26)$ \\
+
+
+Since the inverse of $a_3$ is needed for inversion, we can only use values for $a_3$ for which :\\
+gcd($a_3, 26$) = 1 \\
+We have assumed that $E_k_1(x)$ and $E_k_2(x)$ are two affine ciphers so gcd($a_1, 26$) = 1 and gcd($a_2, 26$) = 1. And we know that $a_3 = a_1.a_2 |26|$. Therefore : gcd($a_3, 26$) = 1
+
+The affine function we obtained is of the required form and $E_k_3(x)=a_3x+b_3$ (mod 26) is an affine cipher.
+
+
+  \item 
+We say that $a_3$ and $b_3$ are each one the remainder of an integer division ($a_3 = a_1.a_2 |26|$ and $b_3 = a_1.b_2 + b_1 |26|$). So we can compute for  $(a_1, b_1) = (3, 5),(a_2, b_2) = (11, 7)$: \\
+
+$a_1.a_2 = 3*11 = 33 = 26*1 +7$ so \fbox{$a_3 = 7$}\\
+$a_1.b_2 +b_1 = 3*7 +5= 26 = 26*1 +0$ \fbox{so $b_3 = 0$}
+
+
+  \item
+Let's first determine the keyspace of a single-encrypted affine ciphertext.
+For the value $b_3$ we have 26 possible values.
+For the value $a_3$ we have 12 possible values because there are 12 numbers less than 26 which are coprime to 26 (all the odd numbers less than 26 except 13).\\
+So we have 12.26 = 312 possible keys for the pair ($a_3,b_3$);\\
+We can deduce that, for the double encrypted ciphertext :\\ \fbox{the key space which contains all possible tuples (a1, b1, a2, b2) is 312² = 97344}\\
+So is it better than the single affine cipher? The answer to our question is NO. The security of two combined affine ciphers is not better than one, because as we see in question 1 we can find an affine cipher that behaves exactly the same as two. So an attacker can directly search for the key ($a_3,b_3$), inside the 312 possible keys, and break our system. There is therefore no advantage of doing double encryption in this case.
+
+
+\end{enumerate}
+
+\clearpage
+
+\section*{Problem 2}
+
+\begin{enumerate}
+  \item 
+We want to find the initialization vector $s_0,s_1,s_2,s_3,s_4,s_5$ (length of 6 because the degree of the LSFR is m=6)
+\begin{tabbing}
+
+We have : \=• The beginning of the plaintext WPI\\
+\>• The ciphertext: J5A0EDJ2B\\
+\>• The known formula : $s_i \equiv x_i+y_i \pmod 2$ where $x_i$ and $y_i$ represents the\\
+\>plaintext and ciphertext
+\end{tabbing}
+
+So we can determine the beginning of the keystream by XOR-ing the ciphertext (the 3 letters/numbers that we have) with the letters/numbers that we have from the plaintext.
+
+We need to convert the letter/number in 5 bits vector before doing this operation:
+
+Plaintext :~~~W~~~~~~~P~~~~~~~I\\
+In binary : 10110~~01111~~01000\\ \\
+
+Ciphertext :~~~J~~~~~~~5~~~~~~~A~~~~~~~...\\
+In binary : 10110~~01111~~01000\\ \\
+
+Then by XOR-ing we obtain the Keystream : 111111000001000\\
+The initialization vector corresponds to the 6 first bits which are : \fbox{111111}
+
+  \item 
+
+We want to know the switch values : $p_0,p_1,p_2,p_3,p_4,p_5$\\
+$p_i\in \left\{ 0,1\right\}_{i\in \left\{ 0,1,2,3,4,5\right\}}$
+
+We can use the formula : $s_{m+i} \equiv\sum_{j=0}^{m-1}p_j s_{i+j}\pmod 2$
+
+And apply it for i = 0;1;2;3;4;5 to make a system of 6 equations with unknowns ($p_0,...,p_{m-1}$), which correspond to ($p_0,...,p_5$)
+
+
+\begin{cases}  
+   s_6 \equiv  p_0 s_0 +  p_1 s_1  +  p_2 s_2 +  p_3 s_3 +  p_4 s_4 +  p_5 s_5     \pmod 2 \\
+   s_7 \equiv  p_0 s_1 +  p_1 s_2 +  p_2 s_3 +  p_3 s_4 +  p_4 s_5 +  p_5 s_6     \pmod 2 \\
+   s_8 \equiv  p_0 s_2 +  p_1 s_3 +  p_2 s_4 +  p_3 s_5 +  p_4 s_6 +  p_5 s_7     \pmod 2 \\
+   s_9 \equiv  p_0 s_3 +  p_1 s_4 +  p_2 s_5 +  p_3 s_6 +  p_4 s_7 +  p_5 s_8    \pmod 2 \\
+   s_{10} \equiv  p_0 s_4 +  p_1 s_5 +  p_2 s_6 +  p_3 s_7 +  p_4 s_8 +  p_5 s_9     \pmod 2 \\
+   s_{11} \equiv  p_0 s_5 +  p_1 s_6 +  p_2 s_7 +  p_3 s_8 +  p_4 s_9 +  p_5 s_{10}     \pmod 2 \\
+\end{cases}  
+
+We know from question 1) that : ($s_0, ..., s_{11}$) = 111111000001\\
+It gives us :
+
+\begin{cases}  
+   0 \equiv  p_0  +  p_1  +  p_2  +  p_3  +  p_4  +  p_5     \pmod 2 \\
+   0 \equiv  p_0  +  p_1  +  p_2  +  p_3  +  p_4     \pmod 2 \\
+   0 \equiv  p_0  +  p_1  +  p_2  +  p_3     \pmod 2 \\
+   0 \equiv  p_0  +  p_1  +  p_2     \pmod 2 \\
+   0 \equiv  p_0  +  p_1     \pmod 2 \\
+   1 \equiv  p_0     \pmod 2 \\
+\end{cases}  
+
+So : $p_0 = 1$;  \\$0 \equiv  p_0  +  p_1     \pmod 2  \implies$  $p_1 = 1$
+\\And then, it is easy to see that $ p_2  =  p_3  =  p_4  =  p_5 = 0$
+
+\fbox{$(p_0,p_1,p_2,p_3,p_4,p_5) = (1, 1, 0, 0, 0, 0) $}
+
+\item
+We perform a known-plaintext attack on an LSFR-based stream cipher.
+
+\end{enumerate}
+
+\clearpage
+
+
+\section*{Problem 3}
+
+\begin{enumerate}
+You can find all the answer for the problem 3 in the .py file. If you are not able to open it, I copy his content in a .txt file.
+\end{enumerate}
+\end{document}
